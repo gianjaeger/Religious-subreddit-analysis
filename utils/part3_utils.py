@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import nltk
+from textblob import TextBlob
 
 def plot_subreddit_term_space(vectors, term1, term2, title=None):
     """
@@ -104,3 +106,20 @@ def create_tf_idf_vectors(results, subs_of_interest, word1, word2):
             tf_idf_vectors[subreddit] = np.array([np.nan, np.nan])
     
     return tf_idf_vectors
+
+def process_subreddit_subjectivity(results, subreddit_name):
+    """
+    Extracts the posts DataFrame for a given subreddit, filters out empty 'selftext',
+    and calculates the subjectivity of each post.
+
+    Parameters:
+    - results (dict): Dictionary containing subreddit dataframes.
+    - subreddit_name (str): The name of the subreddit to process.
+
+    Returns:
+    - DataFrame: The processed DataFrame with a new 'subjectivity' column.
+    """
+    df = results[subreddit_name]['posts_df']
+    df = df[df['selftext'].str.strip().astype(bool)].copy()
+    df['subjectivity'] = df['selftext'].apply(lambda x: TextBlob(x).sentiment.subjectivity)
+    return df
