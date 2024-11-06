@@ -59,7 +59,7 @@ def tfidf_analyze_subreddit(posts, max_terms=1000, min_doc_freq=2, include_selft
         preprocess_text(post.get('title', '')) + (' ' + preprocess_text(post.get('selftext', '')) if include_selftext else '')
         for post in posts
     ]
-    
+
     # Analyze vocabulary first
     freq_df, vocab_stats = analyze_vocabulary(texts, min_freq=min_doc_freq)
     # Generate TF-IDF matrix and feature names
@@ -78,15 +78,27 @@ def tfidf_analyze_subreddit(posts, max_terms=1000, min_doc_freq=2, include_selft
 def generate_tfidf_matrix(texts, max_terms=1000, min_doc_freq=2):
     """
     Generate TF-IDF matrix and feature names from texts.
+    
+    :param texts: List of texts (documents) to analyze.
+    :param max_terms: Maximum number of terms to include in the feature set.
+    :param min_doc_freq: Minimum document frequency for terms to be included.
+    
+    :return: TF-IDF matrix and feature names.
     """
-
+    # Load the default stopwords
+    stop_words = set(stopwords.words('english'))
+    
+    # Initialize the vectorizer with the modified stopwords list
     vectorizer = TfidfVectorizer(
-        stop_words=stopwords.words('english'),
+        stop_words=stop_words,
         max_features=max_terms,
         min_df=min_doc_freq
     )
     
+    # Fit and transform the texts to create the TF-IDF matrix
     tfidf_matrix = vectorizer.fit_transform(texts)
+    
+    # Get the feature names (terms)
     feature_names = vectorizer.get_feature_names_out()
     
     return tfidf_matrix, feature_names

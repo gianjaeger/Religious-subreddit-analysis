@@ -1,8 +1,10 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import nltk
 from textblob import TextBlob
+import seaborn as sns
 
 def plot_subreddit_term_space(vectors, term1, term2, title=None):
     """
@@ -123,3 +125,85 @@ def process_subreddit_subjectivity(results, subreddit_name):
     df = df[df['selftext'].str.strip().astype(bool)].copy()
     df['subjectivity'] = df['selftext'].apply(lambda x: TextBlob(x).sentiment.subjectivity)
     return df
+
+def calculate_analytical_score(text, analytical, emotional):
+    """
+    Returns a simple analytical thinking score:
+    Analytical words count - Emotional words count
+    """
+    words = text.lower().split()
+    analytical_count = sum(1 for word in words if word in analytical)
+    emotional_count = sum(1 for word in words if word in emotional)
+    raw_score = analytical_count - emotional_count
+
+    # Normalize by length of the text (total words)
+    if len(words) > 0:
+        return raw_score / len(words) * 100
+    else:
+        return 0  # In case of empty text, return 0
+    
+def analyze_and_plot_analytical_score(df, analytical_words, emotional_words, sub_name='DataFrame'):
+    """
+    Computes an analytical score for each text in the dataframe and plots the distribution.
+
+    Parameters:
+    - df (pd.DataFrame): The dataframe containing the texts.
+    - analytical_words (list or set): List of words associated with analytical thinking.
+    - emotional_words (list or set): List of words associated with emotional thinking.
+    - text_column (str): Name of the column in df that contains the text. Default is 'selftext'.
+    
+    Returns:
+    - pd.DataFrame: The dataframe with an added 'analytical_score' column.
+    """
+    # Apply the analytical scoring function
+    df['analytical_score'] = df['selftext'].apply(
+        lambda text: calculate_analytical_score(text, analytical_words, emotional_words)
+    )
+
+    # Plotting the distribution of analytical scores
+    plt.figure(figsize=(10, 6))
+    plt.hist(df['analytical_score'], bins=30, color='skyblue', edgecolor='black')
+    plt.title(f"Distribution of Analytical Scores for {sub_name}")
+    plt.xlabel("Analytical Score")
+    plt.ylabel("Frequency")
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.show()
+
+    return df
+
+def compare_analytical_scores(subs_of_interest, *dataframes):
+    """
+    Compares the summary statistics of 'analytical_score' across multiple dataframes.
+    
+    Parameters:
+    - subs_of_interest (list): List of names for the dataframes to be compared.
+    - *dataframes (pd.DataFrame): Dataframes to compare.
+    
+    Returns:
+    - pd.DataFrame: Dataframe containing the summary statistics for 'analytical_score' across all dataframes.
+    """
+    
+    # Add a new column to each dataframe to identify the source (e.g., 'islam', 'Christianity', etc.)
+    for i, df in enumerate(dataframes):
+        df['subreddit'] = subs_of_interest[i]
+    
+    # Concatenate all dataframes into one
+    combined_df = pd.concat(dataframes, ignore_index=True)
+    
+    # Calculate summary statistics for 'analytical_score' across all dataframes
+    summary_stats = combined_df.groupby('subreddit')['analytical_score'].describe()
+
+    # Print the summary statistics
+    print(summary_stats)
+
+    # Plot the comparison using a boxplot
+    plt.figure(figsize=(10, 6))
+    plt.ylim(-4, 4)
+    sns.boxplot(x='subreddit', y='analytical_score', data=combined_df, palette='Set2')
+    plt.title('Comparison of Analytical Scores Across Different Subreddits')
+    plt.xlabel('Subreddit')
+    plt.ylabel('Analytical Score')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.show()
+
+    return summary_stats
