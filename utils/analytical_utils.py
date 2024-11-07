@@ -22,13 +22,9 @@ def plot_subreddit_term_space(vectors, term1, term2, title=None):
     # Plot vectors from origin
     colors = cm.get_cmap('tab10', len(vectors))
 
-    # for (name, vec), color in zip(vectors.items(), colors):
-    #     plt.quiver(0, 0, vec[0], vec[1], angles='xy', scale_units='xy', scale=1,
-    #               color=color, label=name, width=0.008)
-
     for idx, (name, vec) in enumerate(vectors.items()):
         plt.quiver(0, 0, vec[0], vec[1], angles='xy', scale_units='xy', scale=1,
-                   color=colors(idx), label=name, width=0.008)
+                   color=colors(idx), label=name.capitalize(), width=0.008)
     
     # Style the plot
     plt.grid(True, linestyle='--', alpha=0.7)
@@ -49,8 +45,8 @@ def plot_subreddit_term_space(vectors, term1, term2, title=None):
     plt.xlabel(f"'{term1}' TF-IDF score")
     plt.ylabel(f"'{term2}' TF-IDF score")
     plt.title(title or f"Subreddit Vectors in {term1}-{term2} Space")
-    plt.legend()
     
+    plt.legend()
     plt.tight_layout()
     plt.show()
 
@@ -185,7 +181,7 @@ def compare_analytical_scores(subs_of_interest, *dataframes):
     
     # Add a new column to each dataframe to identify the source (e.g., 'islam', 'Christianity', etc.)
     for i, df in enumerate(dataframes):
-        df['subreddit'] = subs_of_interest[i]
+        df['subreddit'] = subs_of_interest[i].capitalize()
     
     # Concatenate all dataframes into one
     combined_df = pd.concat(dataframes, ignore_index=True)
