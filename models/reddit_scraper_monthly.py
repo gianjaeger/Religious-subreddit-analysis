@@ -1,3 +1,6 @@
+
+#### NOT FUNCTIONAL ####
+
 # models/reddit_scraper.py
 import requests
 import time
