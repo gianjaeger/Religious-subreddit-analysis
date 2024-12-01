@@ -1,4 +1,4 @@
-# religious-subreddit-analysis
+# Religious subreddit analysis
 
 This project was a formative assignment for Fundamentals of Data Science as a part of the MSc Social Data Science program at the Oxford Internet Institute, taught by Bernie Hogan.
 
